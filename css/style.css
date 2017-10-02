@@ -27,6 +27,37 @@ a {
 }
 
 
+#menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #eeeeee;
+
+    -webkit-transition: height 0.4s;
+    transition: height 0.4s;
+}
+
+.menuItem {
+    margin: 10px 0;
+}
+
+#hamburger {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 35px;
+    height: 35px;
+    stroke-width: 4px;
+}
+
+
 h1, h2, h3 {
     margin: 3em 0 0.6em 0;
 }
@@ -269,7 +300,7 @@ a:hover, .btn:hover{
     background-color: lightSalmon;
     border-color: lightSalmon;
 }
-#day, #sideText, .caption {
+#day, #sideText, #hamburger, .caption {
     border-color: lightSalmon;
     color: lightSalmon;
 }
@@ -306,6 +337,13 @@ a:hover, .btn:hover{
     }
 }
 @media (max-width:400px){
+    #hamburger {
+        top: 10px;
+        left: 10px;
+        width: 20px;
+        height: 20px;
+        stroke-width: 2px;
+    }
     header {
         padding: 40px;
 

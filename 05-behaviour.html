@@ -11,11 +11,13 @@
     <script src="js/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
 
+    <script src="js/menu.js"></script>
+
     <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
 
 </head>
 
-<body>
+<body onload='init()'>
 
     <header>
         <div class='tt'>CODE //</div>
@@ -23,6 +25,22 @@
         <div class='tt'>CREATE //</div>
         <div id='day'>01</div>
     </header>
+
+    <div id='menu'>
+        <a href='index.html' class='menuItem'>Introduction</a>
+        <a href='01-using-objects.html' class='menuItem'>01. Using Objects</a>
+        <a href='02-adding-organisms.html' class='menuItem'>02. Adding organisms</a>
+        <a href='03-motion-variation.html' class='menuItem'>03. Motion & Variation</a>
+        <a href='04-life.html' class='menuItem'>04. Life</a>
+        <a href='05-behaviour.html' class='menuItem'>05. Behaviour</a>
+        <a href='06-audio-visual.html' class='menuItem'>06. Audio - Visual</a>
+        <a href='07-conclusion.html' class='menuItem'>07. Conclusion</a>
+    </div>
+    <div id='hamburger'>
+        <SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d='M2 25 L98 25 M2 50 L 98 50 M2 75 L98 75' vector-effect="non-scaling-stroke" stroke="currentColor" fill="none"></path>
+        </SVG>
+    </div>
 
     <div id='sideText'>Building Musical Worlds</div>
 
