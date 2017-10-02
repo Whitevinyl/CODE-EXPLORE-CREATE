@@ -1,7 +1,5 @@
 # CODE // EXPLORE // CREATE // DAY 01
 
-***
-
 WORKSHOP // Creative-Coding : Building Musical Worlds
 
 ***
