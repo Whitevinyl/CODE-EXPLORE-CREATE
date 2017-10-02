@@ -9,4 +9,8 @@ The session will make use of Javascript, HTML5 canvas and the Web Audio API. Stu
 
 ***
 
+https://whitevinyl.github.io/CODE-EXPLORE-CREATE
+
+***
+
 *This was originally created as part of 2 days of workshops organised by CodeBar for the Brighton Digital festival.
