@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CODE // EXPLORE // CREATE // DAY 1</title>
+
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/atom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header>
+        <div class='tt'>CODE //</div>
+        <div class='tt'>EXPLORE //</div>
+        <div class='tt'>CREATE //</div>
+        <div id='day'>01</div>
+    </header>
+
+    <div id='sideText'>Building Musical Worlds</div>
+
+    <div id='main'>
+        <h1>Motion & Variation</h1>
+        <p>Alright so we have a little variation in the form of our spores positions onscreen, but we should add more! and let's get things moving around while we're at it.</p>
+
+        <p>Go back to the file <mark>SPORES.js</mark> and let's take another looks at the <mark>Spore</mark> constructor function. There's some more things we can randomise, we can change up the size, we can make a visual variant (i.e we'll have 2 varieties of spores now), and we can randomise some motion.</p>
+
+        <h3>Variety</h3>
+        <p class='short'>We'll use tombola.js again to randomise things, 2 new methods this time, <mark>rangeFloat(min, max)</mark>, which returns a float value (decimal value) between min & max, and <mark>percent(percentage)</mark> which randomly returns true or false given a likeliness. Update the function Spore to look like this:</p>
+
+        <pre><code class='js'>
+function Spore(x1, y1, x2, y2) {
+    this.settings = sporeSettings;
+
+    // randomise position //
+    this.position = new Point(tombola.range(x1, x2), tombola.range(y1, y2));
+
+    // randomise other properties //
+    this.size = tombola.rangeFloat(this.settings.small, this.settings.large);
+    this.variant = tombola.percent(this.settings.variation);
+    this.speedX = tombola.rangeFloat(-this.settings.speed, this.settings.speed);
+    this.speedY = tombola.rangeFloat(-this.settings.speed, this.settings.speed);
+}
+        </code></pre>
+
+        <p>We've created some new properties of Spore here, including two speeds, one for each axis, x & y. These are what we'll use to create random movement. <a href='https://www.youtube.com/watch?v=l__fEY1xanY' target='_blank'>Here</a> is a good video on this topic.</p>
+
+        <h3>Motion</h3>
+        <p class='short'>Okay let's look at Spore's method named <mark>update</mark>. Again we have an empty function waiting for us, but this is where we want to create our movement/animation. Much like the <mark>draw</mark> method, the <mark>update</mark> method will be called every frame. <mark>Update</mark> gets called first, It'll slightly modify a spore's position, then <mark>draw</mark> gets called, drawing each spore at it's new position, creating animation. Fill in the update function like this:</p>
+
+        <pre><code class='js'>
+Spore.prototype.update = function() {
+
+    // Randomly increase or decrease horizontal & vertical speeds //
+    this.speedX += tombola.rangeFloat(-this.settings.fluctuation, this.settings.fluctuation);
+    this.speedY += tombola.rangeFloat(-this.settings.fluctuation, this.settings.fluctuation);
+
+    // Cap the max speed so it doesn't get out of control //
+    this.speedCap();
+
+    // Update the position by adding the speed to it //
+    this.position.x += this.speedX;
+    this.position.y += this.speedY;
+
+    // Wrap around the screen boundaries //
+    screenWrap(this);
+};
+        </code></pre>
+
+        <p>The methods <mark>speedCap</mark> and <mark>screenWrap</mark> have been pre-written. What we're doing here is adding random numbers to the speeds each frame, so we need to make sure the numbers don't get too big. We also want our organisms to wrap around the screen, so that if one floats offscreen to the left, it'll reappear on the right etc.</p>
+
+        <p class='short'>Alright, let's update the <mark>draw</mark> method as well. We'll make it so that if <mark>variant = true</mark>, we draw a diamond shape for the spore's appearance.</p>
+        <pre><code class='js'>
+Spore.prototype.draw = function() {
+    // set color //
+    ctx.fillStyle = this.settings.color;
+    ctx.strokeStyle = this.settings.highlight;
+
+    // set size //
+    ctx.lineWidth = 4 * scale;
+    var s = this.size;
+
+    // move to spore position //
+    ctx.save();
+    ctx.translate(this.position.x, this.position.y);
+
+    // draw //
+    if (this.variant) {
+        s *= 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -s);
+        ctx.lineTo(s, 0);
+        ctx.lineTo(0, s);
+        ctx.lineTo(-s, 0);
+        ctx.closePath();
+        ctx.stroke();
+    } else {
+        ctx.fillRect(-s / 2, -s / 2, s, s);
+    }
+
+    // reset drawing position //
+    ctx.restore();
+};
+        </code></pre>
+
+        <p class='short'>Only one more thing to do here, go back to <mark>MAIN.js</mark>. Go to the <mark>update</mark> function this time, and under the comment <mark>LOOP THROUGH SPORES...</mark> add this loop:</p>
+
+        <pre><code class='js'>
+for (var i=0; i&lt;spores.length; i++) {
+    spores[i].update();
+}
+        </code></pre>
+
+        <p>Load up index.html in the browser again, you should see a load of spores in two varieties floating around as if drifting in water. We've just made dinner for our next organism!</p>
+
+        <div class='further'>
+            Further Learning:<br />
+            <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random' target='_blank'>developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random</a><br />
+            <a href='https://www.youtube.com/watch?v=l__fEY1xanY' target='_blank'>youtube: Random Walker</a>
+        </div>
+
+        <div id='buttons'>
+            <a href='02-adding-organisms.html' class='btn back'>
+                <div class='icon left'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M75 1  L25 50  L75 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+                Back
+            </a>
+
+            <div id='nextSection'>Up Next: Life</div>
+
+            <a href='04-life.html' class='btn next'>
+                Next
+                <div class='icon right'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M25 1  L75 50  L25 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+            </a>
+        </div>
+
+        <div id='footer' class='small'>
+            Workshop by <a href='http://twitter.com/whitevinyluk' target='_blank'>Luke Twyman / Wvnl</a>
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>

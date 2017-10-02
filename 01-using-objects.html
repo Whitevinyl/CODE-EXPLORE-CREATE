@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CODE // EXPLORE // CREATE // DAY 1</title>
+
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/atom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header>
+        <div class='tt'>CODE //</div>
+        <div class='tt'>EXPLORE //</div>
+        <div class='tt'>CREATE //</div>
+        <div id='day'>01</div>
+    </header>
+
+    <div id='sideText'>Building Musical Worlds</div>
+
+    <div id='main'>
+        <h1>Using Objects</h1>
+        <p>If you load the file <mark>index.html</mark> in the browser, you'll see we currently have an empty scene. We need to create our first organisms, and we'll be doing this using javascript <mark>objects</mark>.</p>
+
+        <h3>Object Types</h3>
+        <p>Our scene will be made up of several <em>types</em> of organism, but there will be many <em>instances</em> of each organism type.</p>
+
+        <img src='img/instances.jpg'/>
+        <div class='caption'>Instances acting independently</div>
+
+        <p>Each instance will act as an individual, it'll have its own position on the screen, and it will be performing its own movement and actions independent of the others.</p>
+
+        <p class='short'>We can achieve this in javascript by creating <mark>object types</mark> - this means writing a function that constructs an object, which we can treat a bit like a reusable template.</p>
+
+        <pre><code class='js'>
+function Person(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+}
+        </code></pre>
+
+        <p class='short'>The above example is a constructor function for a type of object we've called <mark>Person</mark>, and it has two properties, <mark>firstName</mark> and <mark>lastName</mark>. We can then create instances of this object like:</p>
+
+        <pre><code class='js'>
+var character = new Person('Edith','Holland');
+        </code></pre>
+
+        <p>So here we've created a variable called <mark>character</mark> and used the keyword <mark>new</mark> to construct an instance of the object type <mark>Person</mark>.</p>
+
+        <p>When dealing with objects we use <mark>.</mark> to reference a property of that object, such as <mark>character.firstName</mark>. In the constructor function for Person you'll see the keyword <mark>this</mark>. We use <mark>this</mark> when an object refers to a property belonging to itself.</p>
+
+        <h3>Methods</h3>
+        <p class='short'>As well as properties, objects can have methods. Methods are actions that can be performed on an object type. When you write <mark>console.log( 'hello' );</mark> you are calling a method named <mark>log</mark> which belongs to an object named <mark><a href='https://developer.mozilla.org/en-US/docs/Web/API/Console' target='_blank'>console</a></mark>.</p>
+
+        <pre><code class='js'>
+Person.prototype.fullName = function() {
+    return this.firstName + ' ' + this.lastName;
+}
+        </code></pre>
+        <p class='short'>The above example may look a little strange, we won't get into the details of <mark>prototype</mark> here, but essentially this creates a method called <mark>fullName</mark> which belongs to the object type <mark>Person</mark>. This method returns a combined string of both firstName and lastName (with a space between), and its available to any instances of Person. We could call it on <mark>character</mark> like this:</p>
+
+        <pre><code class='js'>
+character.fullName();
+        </code></pre>
+
+        <p>If you like, try opening the console and pasting in the above code snippets, maybe create some extra characters of your own and have a play. Don't worry about spending too much time on this section though, you can always come back to it for further understanding. Next let's get straight on with creating!</p>
+
+        <div class='further'>
+            Further Learning:<br />
+            <a href='https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects' target='_blank'>developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects</a><br />
+            <a href='https://www.youtube.com/watch?v=hS_WqkyUah8' target='_blank'>youtube: Prototypes in Javascript</a>
+        </div>
+
+        <div id='buttons'>
+            <a href='index.html' class='btn back'>
+                <div class='icon left'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M75 1  L25 50  L75 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+                Back
+            </a>
+
+            <div id='nextSection'>Up Next: Adding Organisms</div>
+
+            <a href='02-adding-organisms.html' class='btn next'>
+                Next
+                <div class='icon right'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M25 1  L75 50  L25 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+            </a>
+        </div>
+
+        <div id='footer' class='small'>
+            Workshop by <a href='http://twitter.com/whitevinyluk' target='_blank'>Luke Twyman / Wvnl</a>
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>

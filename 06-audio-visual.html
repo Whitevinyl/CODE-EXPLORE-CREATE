@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CODE // EXPLORE // CREATE // DAY 1</title>
+
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/atom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header>
+        <div class='tt'>CODE //</div>
+        <div class='tt'>EXPLORE //</div>
+        <div class='tt'>CREATE //</div>
+        <div id='day'>01</div>
+    </header>
+
+    <div id='sideText'>Building Musical Worlds</div>
+
+    <div id='main'>
+
+        <h1>Audio - Visual</h1>
+        <p>Next we'll be adding visual & sound indication to our organisms actions. First let's create a quick visual object.</p>
+
+        <h3>Visuals</h3>
+        <p class='short'>Head to the file <mark>VISUAL.js</mark>. There, let's update the constructor function to look like this, setting a size, position and alpha transparency as its properties:</p>
+
+        <pre><code class='js'>
+function Visual(x, y, size) {
+    this.settings = visualSettings;
+    this.position = new Point(x, y);
+    this.size = size * scale;
+    this.alpha = 100;
+}
+        </code></pre>
+
+        <p class='short'>Now, we'll write the <mark>update</mark> method to grow and fade the visual every frame, until it fades out entirely, at which point we remove it.</p>
+
+        <pre><code class='js'>
+Visual.prototype.update = function() {
+    // fade and grow //
+    this.alpha -= 2;
+    this.size++;
+
+    // destroy when fully faded //
+    if (this.alpha <= 0) {
+        removeFromArray(this, visuals);
+    }
+};
+        </code></pre>
+
+        <p class='short'>Next, we'll update the <mark>draw</mark> method to create a pair of expanding circles:</p>
+
+        <pre><code class='js'>
+Visual.prototype.draw = function() {
+    // drawing style //
+    ctx.globalAlpha = this.alpha/100;
+    ctx.strokeStyle = this.settings.color;
+    ctx.lineWidth = 4 * scale;
+
+    // draw circles //
+    ctx.beginPath();
+    ctx.arc(this.position.x, this.position.y, this.size, 0, TAU);
+    ctx.moveTo(this.position.x + this.size + 10, this.position.y);
+    ctx.arc(this.position.x, this.position.y, this.size + 10, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+};
+        </code></pre>
+
+        <p class='short'>Then we need to head to <mark>MAIN.js</mark> and create an instance generate function for visual, and call <mark>update</mark> & <mark>draw</mark> on its instances, as we've done before.</p>
+        <p class='short'>Within the <mark>draw</mark> function add:</p>
+
+        <pre><code class='js'>
+for (var i=0; i&lt;visuals.length; i++) {
+    visuals[i].draw();
+}
+        </code></pre>
+
+        <p class='short'>Within the <mark>update</mark> function add:</p>
+
+        <pre><code class='js'>
+for (var i=0; i&lt;visuals.length; i++) {
+    visuals[i].update();
+}
+        </code></pre>
+
+        <p class='short'>Update the function <mark>generateVisual</mark> to look like:</p>
+
+        <pre><code class='js'>
+function generateVisual(position, size) {
+    visuals.push( new Visual(position.x, position.y, size * 2) );
+}
+        </code></pre>
+
+        <p class='short'>Finally, go to the file <mark>ORGANISM1.js</mark> and update its <mark>kill</mark> method to include the function <mark>generateVisual</mark>:</p>
+
+        <pre><code class='js'>
+Organism1.prototype.kill = function() {
+    removeFromArray(this, org1);
+    var area = 30 * scale;
+    generateSpores(this.size * 0.72, this.position.x - area, this.position.y - area, this.position.x + area, this.position.y + area);
+    generateVisual(this.position, this.size);
+};
+        </code></pre>
+
+        <p class='short'>And do the same in the file <mark>SPORES.js</mark>:</p>
+
+        <pre><code class='js'>
+Spore.prototype.kill = function() {
+    removeFromArray(this, spores);
+    generateVisual(this.position, this.size);
+};
+        </code></pre>
+
+        <p>Now we have some nice visual indications of the organism events. Let's look at adding sounds.</p>
+
+
+        <h3>Audio</h3>
+        <p>We'll be using the <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API' target='_blank'>Web Audio API</a> which is a powerful & exciting way that we can use javascript to create and control sound right in the browser. We'll be creating a function which randomly picks a note from a musical scale and plays it whenever an organism breeds or dies.</p>
+
+        <p>The Web Audio API works by letting us create a source of sound, connecting it to effects, and connecting those effects to our output, which in most cases is our computer speakers/headphones.</p>
+
+        <p>Go to the file <mark>AUDIO.js</mark>. You'll see that some of the basic setup has been done for you, and there's an existing function called <mark>setupAudio</mark> which sets up our musical scale and overall sound volume, as well as a delay effect which we'll be connecting our random sounds to. We're using a javascript library called tone.js to make things a little simpler.</p>
+
+        <p>Below that function let's modify the function called <mark>soundEvent</mark>. We're going to create an <mark>oscillator</mark> as our sound source, which allows us to generate a tone at a given pitch. We'll be connecting that to a <mark>gain</mark> node, which allows us to effect the volume. We connect the gain to our output.</p>
+
+        <pre><code class='js'>
+function soundEvent() {
+
+    // create the oscillator and gain nodes //
+    var osc = new Tone.Oscillator();
+    var amp = audioCtx.createGain();
+
+    // connect the oscillator and gain to the output //
+    osc.connect(amp);
+    amp.connect(output);
+}
+        </code></pre>
+
+        <p class='short'>We want to add a few more things to this function, first we want to randomise a note, we can use tombola to select a note from our scale at random. We also want to start the sound and schedule some changes. First we want to quickly ramp up the volume (attack), then after a while smoothly reduce it again (release). Controlling the volume of a sound like this is described as its envelope. Then we want to stop the sound once its played its duration.</p>
+
+        <pre><code class='js'>
+function soundEvent(volume, attack, release) {
+
+    // configure the time and pitch //
+    var now = audioCtx.currentTime;
+    var duration = attack + release;
+    var note = tune.note(tombola.item(whiteNotes));
+
+    // create the oscillator and gain nodes //
+    var osc = new Tone.Oscillator(note);
+    var amp = audioCtx.createGain();
+
+    // connect the oscillator and gain to the output //
+    osc.connect(amp);
+    amp.connect(output);
+
+    // setup the volume envelope //
+    amp.gain.setValueAtTime(0, now);
+    amp.gain.linearRampToValueAtTime(volume, now + attack);
+    amp.gain.exponentialRampToValueAtTime(0.00001, now + duration);
+
+    // start the sound and schedule it stopping //
+    osc.start();
+    osc.stop('+' + (duration * 1.1));
+}
+        </code></pre>
+
+        <p class='short'>Finally, go to the file <mark>ORGANISM1.js</mark> and update its <mark>kill</mark> method to include the function <mark>soundEvent</mark>:</p>
+
+        <pre><code class='js'>
+Organism1.prototype.kill = function() {
+    removeFromArray(this, org1);
+    var area = 30 * scale;
+    generateSpores(this.size * 0.72, this.position.x - area, this.position.y - area, this.position.x + area, this.position.y + area);
+    generateVisual(this.position, this.size);
+    soundEvent(this.settings.soundVolume, this.settings.soundAttack, this.settings.soundRelease);
+};
+        </code></pre>
+
+        <p class='short'>And do the same in the file <mark>SPORES.js</mark>:</p>
+
+        <pre><code class='js'>
+Spore.prototype.kill = function() {
+    removeFromArray(this, spores);
+    generateVisual(this.position, this.size);
+    soundEvent(this.settings.soundVolume, this.settings.soundAttack, this.settings.soundRelease);
+};
+        </code></pre>
+
+        <p>Open up <mark>index.html</mark> in the browser one more time and take a listen. Note that Firefox currently doesn't handle envelopes well, so Chrome or Safari recommended.</p>
+
+        <div class='further'>
+            Further Learning:<br />
+            <a href='https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API' target='_blank'>developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API</a><br />
+            <a href='https://tonejs.github.io/' target='_blank'>tonejs.github.io/</a>
+        </div>
+
+        <div id='buttons'>
+            <a href='05-behaviour.html' class='btn back'>
+                <div class='icon left'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M75 1  L25 50  L75 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+                Back
+            </a>
+
+            <div id='nextSection'>Up Next: Conclusion</div>
+
+            <a href='07-conclusion.html' class='btn next'>
+                Next
+                <div class='icon right'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M25 1  L75 50  L25 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+            </a>
+        </div>
+
+        <div id='footer' class='small'>
+            Workshop by <a href='http://twitter.com/whitevinyluk' target='_blank'>Luke Twyman / Wvnl</a>
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>

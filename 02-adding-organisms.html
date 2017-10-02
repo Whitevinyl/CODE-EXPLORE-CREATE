@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CODE // EXPLORE // CREATE // DAY 1</title>
+
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/atom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header>
+        <div class='tt'>CODE //</div>
+        <div class='tt'>EXPLORE //</div>
+        <div class='tt'>CREATE //</div>
+        <div id='day'>01</div>
+    </header>
+
+    <div id='sideText'>Building Musical Worlds</div>
+
+    <div id='main'>
+        <h1>Adding Organisms</h1>
+        <p>The first organism we'll create is called "spore". These spores are tiny and just kind of drift around in our ecosystem, like simple <a href='https://en.wikipedia.org/wiki/Plankton' target='_blank'>plankton</a>. In your project, open the folder <mark>js</mark> and open the file named <mark>SPORES.js</mark>.</p>
+
+        <p>At the top of the file you'll see an object containing a bunch of pre-filled-out settings. We'll be using settings like this to customise the behaviour and appearance for each organism, so you can easily tweak them as as we go.</p>
+
+        <h3>Randomness</h3>
+        <p class='short'>Under the header <mark>INITIALISE</mark>, you'll see an existing function called <mark>Spore</mark>. We'll be adding to this, its going to be our constructor function, used to set up each new spore instance.</p>
+
+        <pre><code class='js'>
+function Spore() {
+    this.settings = sporeSettings;
+}
+        </code></pre>
+
+        <p>Much of the behaviour and variety of our scene will be created by generating random numbers. Javascript has an inbuilt method for generating (pseudo) random numbers, in the form of <mark>Math.random()</mark>. You can read more about generating numbers this way <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random' target='_blank'>here</a>.</p>
+
+        <p>For this workshop we'll be using a small javascript library (already included in the project files) called <a href='https://github.com/Whitevinyl/tombola.js' target='_blank'>tombola.js</a>, which contains a set of premade functions for generating random numbers and chance events.</p>
+
+        <h3>Let's Code!</h3>
+        <p class='short'>So the first thing we want to do to our spores is give them a randomised position on the screen. We can use the method <mark>tombola.range(min, max)</mark> to give us a random number between a min & max value. We can use it twice, once for the x axis, and once for the y axis, to give us a randomised position between two co-ordinates. Update the function Spore to look like this:</p>
+
+        <pre><code class='js'>
+function Spore(x1, y1, x2, y2) {
+    this.settings = sporeSettings;
+
+    // randomise position //
+    this.position = new Point(tombola.range(x1, x2), tombola.range(y1, y2));
+}
+        </code></pre>
+
+        <p class='small'>*<mark>Point</mark> is an object containing x & y properties. It, along with a few other common maths functions we'll use, have already been defined in the file <mark>UTILS.js</mark>.</p>
+
+        <p>We have some more to do to the function <mark>Spore</mark>, but let's jump ahead to creating some instances and drawing them, so we can see what we've got.</p>
+
+        <p class='short'>Under the header <mark>DRAW</mark> you'll find an empty function. This is going to be a method of Spore, its going to get called every frame to display and animate our spore instances.</p>
+
+        <pre><code class='js'>
+Spore.prototype.draw = function() {
+
+};
+        </code></pre>
+
+        <p class='short'>For now we'll do some simple Canvas drawing. <a href='https://joshondesign.com/p/books/canvasdeepdive/chapter01.html' target='_blank'>Here</a> is a great primer on Canvas and how it works. Modify the draw function to look like the below snippet. You can find out more about the <mark>translate</mark> method <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Transformations' target='_blank'>here</a>.</p>
+
+        <pre><code class='js'>
+Spore.prototype.draw = function() {
+        // set color //
+        ctx.fillStyle = this.settings.color;
+
+        // move to spore position //
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+
+        // draw dot //
+        ctx.fillRect(-1, -1, 2, 2);
+
+        // reset drawing position //
+        ctx.restore();
+};
+        </code></pre>
+
+        <p>Okay so we have a simple draw method, it moves to an instance's position on the screen, and draws a dot there with a given color which comes from the settings.</p>
+
+        <h3>Creating Instances</h3>
+        <p>We're now going to move to a different file, open up <mark>MAIN.js</mark>. This file contains an <mark>init</mark> function which is called when the page loads, as well as our main animation loop for the app.</p>
+
+        <p class='short'>Under the heading <mark>GENERATE</mark> you'll find an empty function called <mark>generateSpores</mark>. We're going to fill out this function to take a number, and two sets of co-ordinates, and it will use a <mark>for loop</mark> generate a bunch of instances of Spore within those co-ordinates, saving them to an array called <mark>spores</mark>:</p>
+
+        <pre><code class='js'>
+function generateSpores(n, x1, y1, x2, y2) {
+    for (var i=0; i&lt;n; i++) {
+        spores.push( new Spore(x1, y1, x2, y2) );
+    }
+}
+        </code></pre>
+
+        <p class='short'>Now we want to call this function when our page loads. Go to the function <mark>init</mark>. within it, under the comment <mark>GENERATE ORGANISMS</mark> (line 38) we'll add the below code, to create 60 instances of Spore randomly position on the screen:</p>
+
+        <pre><code class='js'>
+generateSpores(60, 0, 0, width, height);
+        </code></pre>
+
+        <p class='short'>One more thing we want to do here, and that's loop through all of the instances of Spore we've created, and call their <mark>draw</mark> method.</p>
+        <p class='short'>Still in <mark>MAIN.js</mark>, scroll down to the function called <mark>draw</mark>. This is a main draw loop for the app which gets called 60 times per second. Under the comment <mark>LOOP THROUGH SPORES...</mark> add this loop:</p>
+
+        <pre><code class='js'>
+for (var i=0; i&lt;spores.length; i++) {
+    spores[i].draw();
+}
+        </code></pre>
+
+        <p>Alright! that's probably a lot to digest for now, but load up <marker>index.html</marker> in a browser, and you should hopefully see a random scattering of dots (our spores!), each time you refresh the page the dot positions will be randomised. Its not much just yet, but we're now in a position to start getting interesting!</p>
+
+        <div class='further'>
+            Further Learning:<br />
+            <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random' target='_blank'>developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random</a><br />
+            <a href='https://www.youtube.com/watch?v=l__fEY1xanY' target='_blank'>youtube: Random Walker</a><br />
+            <a href='https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Transformations' target='_blank'>developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Transformations</a><br />
+            <a href='https://joshondesign.com/p/books/canvasdeepdive/chapter01.html' target='_blank'>joshondesign.com/p/books/canvasdeepdive</a>
+        </div>
+
+        <div id='buttons'>
+            <a href='01-using-objects.html' class='btn back'>
+                <div class='icon left'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M75 1  L25 50  L75 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+                Back
+            </a>
+
+            <div id='nextSection'>Up Next: Motion & Variation</div>
+
+            <a href='03-motion-variation.html' class='btn next'>
+                Next
+                <div class='icon right'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M25 1  L75 50  L25 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+            </a>
+        </div>
+
+        <div id='footer' class='small'>
+            Workshop by <a href='http://twitter.com/whitevinyluk' target='_blank'>Luke Twyman / Wvnl</a>
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>CODE // EXPLORE // CREATE // DAY 1</title>
+
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="css/atom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700|Open+Sans:400,700,i400" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <header>
+        <div class='tt'>CODE //</div>
+        <div class='tt'>EXPLORE //</div>
+        <div class='tt'>CREATE //</div>
+        <div id='day'>01</div>
+    </header>
+
+    <div id='sideText'>Building Musical Worlds</div>
+
+    <div id='main'>
+        <h1>Behaviour</h1>
+        <p>Let's go back to the file <mark>ORGANISM1.js</mark> and get straight to adding those additional behaviours.</p>
+
+        <h3>Feeding</h3>
+        <p class='short'>Within the <mark>update</mark> method, above where we added the movement, let's add the feeding behaviour, and let's also create a <em>need</em> for feeding by making the organism's energy gradually deplete over time:</p>
+
+        <pre><code class='js'>
+    var partner = false;
+
+    // FEEDING //
+    if (!partner &amp;&amp; this.energy &lt; this.settings.feedCap) {
+        var target = null;
+        var range = this.settings.feedRange;
+        for (j=0; j&lt;spores.length; j++) {
+            var organism = spores[j];
+            if (organism.variant &amp;&amp; distanceBetweenPoints(this.position, organism.position) &lt; range ) {
+                target = organism;
+                range = distanceBetweenPoints(this.position, organism.position);
+            }
+        }
+        if (target) {
+
+            // point towards target //
+            this.angleDest = angleBetweenPoints(this.position, target.position);
+
+            // if close enough to target, eat it! //
+            if (distanceBetweenPoints(this.position, target.position) &lt; this.settings.feedProximity) {
+                this.energy += (target.size * 1.5);
+                target.kill();
+            }
+        }
+    }
+
+
+    // ENERGY //
+    this.energy -= 0.005;
+    if (this.energy &lt;= 0) {
+        this.kill();
+    }
+        </code></pre>
+
+        <p>The above code checks to see if the organism needs to eat, then loops through all available food to see if there is any in range, and if so, adjusts its angle to point towards it.</p>
+
+        <p class='short'>Currently the organisms are chasing their food but not actually eating it. We need to make it so that both this organism and it's food can die. Scroll down to the method named <mark>kill</mark> and update it to look like:</p>
+
+        <pre><code class='js'>
+Organism1.prototype.kill = function() {
+    removeFromArray(this, org1);
+    var area = 30 * scale;
+    generateSpores(this.size * 0.72, this.position.x - area, this.position.y - area, this.position.x + area, this.position.y + area);
+};
+        </code></pre>
+
+        <p>Now when an organism1 dies, it gets deleted from the array of instances, and creates a cloud of spores in its place.</p>
+
+        <p class='short'>We need to do the same for its food, spore. So go to the file <mark>SPORES.js</mark> and go to the <mark>kill</mark> method. Update it to:</p>
+
+        <pre><code class='js'>
+Spore.prototype.kill = function() {
+    removeFromArray(this, spores);
+};
+        </code></pre>
+
+        <h3>Breeding</h3>
+        <p class='short'>OK so let's head back to the file <mark>ORGANISM1.js</mark> to add the last big behaviour. At the top of the <mark>update</mark> method, we need to replace this line:</p>
+
+        <pre><code class='js'>
+    var partner = false;
+        </code></pre>
+
+        <p class='short'>with:</p>
+
+        <pre><code class='js'>
+    // BREEDING //
+    if (this.energy &gt; this.settings.breedEnergy) {
+        var partner = null;
+        var range = this.settings.breedRange;
+
+        // check for potential partners //
+        for (j=0; j&lt;org1.length; j++) {
+            var organism = org1[j];
+            if (organism!== this &amp;&amp; organism.energy &gt; this.settings.breedEnergy &amp;&amp; distanceBetweenPoints(this.position, organism.position) &lt; range ) {
+                partner = organism;
+                range = distanceBetweenPoints(this.position, organism.position);
+            }
+        }
+        if (partner) {
+            // point towards partner //
+            this.angleDest = angleBetweenPoints(this.position, partner.position);
+            if (this.speed &lt; partner.speed) {
+                this.speed -= this.settings.fluctuation;
+            } else {
+                this.speed += this.settings.fluctuation;
+            }
+
+            // if close enough to partner, breed! //
+            if (distanceBetweenPoints(this.position, partner.position) &lt; this.settings.breedProximity) {
+                var area = 10 * scale;
+                generateOrganism1(1, this.position.x - area, this.position.y - area, this.position.x + area, this.position.y + area);
+                generateVisual(this.position, this.size);
+                soundEvent(this.settings.soundVolume, this.settings.soundAttack, this.settings.soundRelease);
+                this.energy -= 5;
+                partner.energy -= 5;
+            }
+        }
+    }
+        </code></pre>
+
+        <p>Similar to the feeding code, the breeding code checks if an organism has enough energy to breed before looping through any potential partners and seeing if they're close by. If so they'll head towards them, and when close enough, create brand new instances of organism1.</p>
+
+        <p class='short'>We've added a lot of code to the update method now! It could be improved in future by separating each behaviour into its own method. As it stands that whole function should look like this:</p>
+
+        <pre><code class='js'>
+Organism1.prototype.update = function() {
+
+    // BREEDING //
+    if (this.energy &gt; this.settings.breedEnergy) {
+        var partner = null;
+        var range = this.settings.breedRange;
+
+        // check for potential partners //
+        for (j=0; j&lt;org1.length; j++) {
+            var organism = org1[j];
+            if (organism!== this &amp;&amp; organism.energy &gt; this.settings.breedEnergy &amp;&amp; distanceBetweenPoints(this.position, organism.position) &lt; range ) {
+                partner = organism;
+                range = distanceBetweenPoints(this.position, organism.position);
+            }
+        }
+        if (partner) {
+            // point towards partner //
+            this.angleDest = angleBetweenPoints(this.position, partner.position);
+            if (this.speed &lt; partner.speed) {
+                this.speed -= this.settings.fluctuation;
+            } else {
+                this.speed += this.settings.fluctuation;
+            }
+
+            // if close enough to partner, breed! //
+            if (distanceBetweenPoints(this.position, partner.position) &lt; this.settings.breedProximity) {
+                var area = 10 * scale;
+                generateOrganism1(1, this.position.x - area, this.position.y - area, this.position.x + area, this.position.y + area);
+                generateVisual(this.position, this.size);
+                soundEvent(this.settings.soundVolume, this.settings.soundAttack, this.settings.soundRelease);
+                this.energy -= 5;
+                partner.energy -= 5;
+            }
+        }
+    }
+
+
+    // FEEDING //
+    if (!partner &amp;&amp; this.energy &lt; this.settings.feedCap) {
+        var target = null;
+        var range = this.settings.feedRange;
+        for (j=0; j&lt;spores.length; j++) {
+            var organism = spores[j];
+            if (organism.variant &amp;&amp; distanceBetweenPoints(this.position, organism.position) &lt; range ) {
+                target = organism;
+                range = distanceBetweenPoints(this.position, organism.position);
+            }
+        }
+        if (target) {
+
+            // point towards target //
+            this.angleDest = angleBetweenPoints(this.position, target.position);
+
+            // if close enough to target, eat it! //
+            if (distanceBetweenPoints(this.position, target.position) &lt; this.settings.feedProximity) {
+                this.energy += (target.size * 1.5);
+                target.kill();
+            }
+        }
+    }
+
+
+    // ENERGY //
+    this.energy -= 0.005;
+    if (this.energy &lt;= 0) {
+        this.kill();
+    }
+
+
+    // MOVEMENT //
+    // Store a memory of previous positions //
+    this.lastPositions.push( this.position.clone() );
+    if (this.lastPositions.length &gt; this.settings.tail) {
+        this.lastPositions.shift();
+    }
+
+    // Randomly increase or decrease rotation &amp; speed //
+    this.angle = normaliseAngle(this.angle);
+    this.angleDest += tombola.rangeFloat(-this.settings.fluctuation, this.settings.fluctuation);
+    if ((this.angleDest - this.angle) &gt; (TAU/2)) {
+        this.angleDest -= TAU;
+    }
+    if ((this.angleDest - this.angle) &lt; -(TAU/2)) {
+        this.angleDest += TAU;
+    }
+
+    // smoothly transition to angle //
+    this.angle = lerp(this.angle, this.angleDest, this.settings.rotationSpeed);
+    this.speed += tombola.rangeFloat(-this.settings.fluctuation, this.settings.fluctuation);
+
+    // Cap the max speed so it doesn't get out of control //
+    this.speedCap();
+
+    // Update the position by adding the seed to it //
+    this.position.x += (this.speed * Math.cos(this.angle));
+    this.position.y += (this.speed * Math.sin(this.angle));
+
+    // Wrap around the screen boundaries //
+    screenWrap(this);
+};
+        </code></pre>
+
+        <p>Alright, let's finally add some visual and audio events!</p>
+
+        <div id='buttons'>
+            <a href='04-life.html' class='btn back'>
+                <div class='icon left'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M75 1  L25 50  L75 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+                Back
+            </a>
+
+            <div id='nextSection'>Up Next: Audio-Visual</div>
+
+            <a href='06-audio-visual.html' class='btn next'>
+                Next
+                <div class='icon right'><SVG viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M25 1  L75 50  L25 99" vector-effect="non-scaling-stroke" stroke="currentColor" stroke-width="1.1" fill="none"></path>
+                </SVG></div>
+            </a>
+        </div>
+
+        <div id='footer' class='small'>
+            Workshop by <a href='http://twitter.com/whitevinyluk' target='_blank'>Luke Twyman / Wvnl</a>
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>
